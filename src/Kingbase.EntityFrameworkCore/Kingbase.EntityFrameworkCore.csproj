@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>Kingbase.EntityFrameworkCore</AssemblyName>
+    <RootNamespace>Kingbase.EntityFrameworkCore</RootNamespace>
+    <PackageId>Kingbase.EntityFrameworkCore</PackageId>
+    <Version>10.0.0-alpha.3</Version>
+    <Description>Entity Framework Core 10 provider foundation for KingbaseES.</Description>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <NoWarn>$(NoWarn);EF1001;EF9100</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Kdbndp_V9" Version="10.0.1.703" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.9" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+</Project>

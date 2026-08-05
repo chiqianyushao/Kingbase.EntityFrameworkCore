@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<title>ABP BookStore × KingbaseES — 能力矩阵实测结果</title>
+<style>
+body{font-family:-apple-system,'Segoe UI',Roboto,'Microsoft YaHei',sans-serif;margin:2rem auto;max-width:1100px;color:#1f2328;line-height:1.55;padding:0 1rem}
+h1{font-size:1.6rem;border-bottom:2px solid #d0d7de;padding-bottom:.4rem}
+h2{font-size:1.2rem;margin-top:2rem;border-bottom:1px solid #d0d7de;padding-bottom:.3rem}
+table{border-collapse:collapse;width:100%;margin:.6rem 0 1.4rem;font-size:.9rem}
+th,td{border:1px solid #d0d7de;padding:.35rem .6rem;text-align:left;vertical-align:top}
+th{background:#f6f8fa;font-weight:600}
+tr:nth-child(even) td{background:#fafbfc}
+code{background:#f0f2f4;border-radius:3px;padding:0 .25em;font-size:.85em}
+.note{color:#57606a;font-style:italic;font-size:.85em}
+.summary td:first-child{font-weight:600}
+</style></head><body>
+<h1>ABP BookStore × KingbaseES — 能力矩阵实测结果(EF Core 10)</h1>
+<p>日期:2026-08-05 · 样例:<code>samples/AbpBookStore/</code>(真实 ABP 10.6 + Kingbase.EntityFrameworkCore + 真实 KingbaseES) · 矩阵来源:<code>docs/EFCore10-KingbaseES-Compatibility-Report.md</code>(§3–§14)</p>
+<h2>汇总</h2><table class="summary"><tr><th>状态</th><th>数量</th></tr>
+<tr><td>✅ 本样例实库重验</td><td>181</td></tr>
+<tr><td>🟡 Provider 套件已验证</td><td>154</td></tr>
+<tr><td>⛔</td><td>20</td></tr>
+<tr><td>❌</td><td>13</td></tr>
+<tr><td>🚫</td><td>1</td></tr>
+</table>
+<h2>3. 已实库确认的能力</h2>
+<table><tr><th>能力</th><th>原报告</th><th>本样例实测</th><th>证据</th></tr>
+<tr><td><code>UseKdbndp(string)</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>所有测试经 EF 模块 UseKdbndp(conn)</td></tr>
+<tr><td><code>UseKdbndp(DbConnection)</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityConnectionTransactionsTests.Use_transaction_with_external_kdbndp_connection</td></tr>
+<tr><td><code>Oracle 兼容模式选项</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>AbpBookStoreEntityFrameworkCoreModule SetOracleCompatibilityMode()</td></tr>
+<tr><td><code>基础 Where/Select/OrderBy/Take</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Comparison_logic_arithmetic_and_ternary</td></tr>
+<tr><td><code>LIMIT/OFFSET</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Set_ordering_and_paging</td></tr>
+<tr><td><code>新增/查询/修改/删除</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilitySaveTrackingTests.Add/Update/Remove</td></tr>
+<tr><td><code>手工键值 Insert</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>ModelBehaviorTests.BookAuthor_composite_key（Guid 客户端赋值）</td></tr>
+<tr><td><code>identity 主键回读</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseCrudIntegrationTests.Insert_reads_database_generated_identity</td></tr>
+<tr><td><code>乐观并发更新条件</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>ModelBehaviorTests.ConcurrencyStamp_stale_update_throws</td></tr>
+<tr><td><code>ExecuteDelete/ExecuteDeleteAsync</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilitySaveTrackingTests.ExecuteDelete_and_ExecuteUpdate</td></tr>
+<tr><td><code>Any/Single/ToList 异步查询</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Aggregate/Element</td></tr>
+<tr><td><code>基础事务性 SaveChanges</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilitySaveTrackingTests.SaveChanges_sync_and_async</td></tr>
+<tr><td><code>EnsureCreated</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>ModuleAndRepositoryTests.Module_creates_schema;TestDatabase.ResetSchemaAsync</td></tr>
+<tr><td><code>EnsureDeleted</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseCrudIntegrationTests.EnsureCreated_and_EnsureDeleted_manage_the_database</td></tr>
+<tr><td><code>数据库创建/删除</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityMigrationsTests（管理库建/删临时库）</td></tr>
+<tr><td><code>数据库存在性/用户表检测</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseCrudIntegrationTests.EnsureCreated_creates_tables_from_the_ef_model</td></tr>
+<tr><td><code>字符串专用翻译</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.String_translations</td></tr>
+<tr><td><code>日期部件翻译</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Date_translations</td></tr>
+<tr><td><code>数学函数翻译</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Math_translations</td></tr>
+<tr><td><code>查询 API 契约</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>QueryApiContractTests（反射清单）</td></tr>
+<tr><td><code>聚合与集合运算</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Aggregate/Set_ordering</td></tr>
+<tr><td><code>.NET 10 左右连接</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseQueryTranslationIntegrationTests.Grouping_and_join_operators</td></tr>
+<tr><td><code>Split Query</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Query_extensions</td></tr>
+<tr><td><code>EF 查询扩展</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Query_extensions</td></tr>
+<tr><td><code>关系型查询扩展</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.From_sql_and_create_db_command</td></tr>
+<tr><td><code>CLR 标量类型往返</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseTypeAndSaveIntegrationTests.Scalar_clr_types_roundtrip</td></tr>
+<tr><td><code>保存与批处理</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilitySaveTrackingTests 全部</td></tr>
+<tr><td><code>设计时 Provider 发现</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseDesignTimeServicesTests</td></tr>
+</table>
+<h2>4. EF Core 10 新增能力专项矩阵</h2>
+<table><tr><th>能力</th><th>原报告</th><th>本样例实测</th><th>证据</th></tr>
+<tr><td><code>Optional complex types - table splitting</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseRemainingCoverageIntegrationTests.Optional_struct_complex_equality_and_bulk_assignment_work</td></tr>
+<tr><td><code>Complex types 映射 JSON</code></td><td>❌</td><td>❌</td><td>无 EF JSON SQL tree<br/><span class="note">报告结论：不支持</span></td></tr>
+<tr><td><code>Complex type struct</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseRemainingCoverageIntegrationTests.Optional_struct_complex_equality_and_bulk_assignment_work</td></tr>
+<tr><td><code>Complex type structural equality</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>同上</td></tr>
+<tr><td><code>Complex type bulk assignment</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>同上</td></tr>
+<tr><td><code>参数化集合默认多参数翻译</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseQueryTranslationIntegrationTests.Microsecond_nanosecond_null_compensation_and_parameter_collections</td></tr>
+<tr><td><code>.NET 10 LeftJoin</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseQueryTranslationIntegrationTests.Grouping_and_join_operators</td></tr>
+<tr><td><code>.NET 10 RightJoin</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>同上</td></tr>
+<tr><td><code>Split query 稳定排序改进</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseQueryTranslationIntegrationTests.Ef_query_extensions</td></tr>
+<tr><td><code>DateOnly.ToDateTime 翻译</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseQueryTranslationIntegrationTests.Date_time_methods_and_current_time</td></tr>
+<tr><td><code>DateOnly.DayNumber</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseQueryTranslationIntegrationTests.Microsecond_nanosecond_null_compensation_and_parameter_collections</td></tr>
+<tr><td><code>微秒/纳秒 DatePart 翻译</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>同上</td></tr>
+<tr><td><code>string 方法接收 char</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseQueryTranslationIntegrationTests.String_translations</td></tr>
+<tr><td><code>JSON 列 ExecuteUpdate</code></td><td>❌</td><td>❌</td><td>无 JSON 更新 SQL<br/><span class="note">报告结论：不支持</span></td></tr>
+<tr><td><code>Named query filters</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseModelIntegrationTests.Model_facets_constraints_relationships_filters_views_and_inheritance</td></tr>
+<tr><td><code>ExecuteUpdateAsync 普通 lambda</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilitySaveTrackingTests.ExecuteDelete_and_ExecuteUpdate</td></tr>
+<tr><td><code>参数名简化</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>Provider 自身测试（SQL 观察）</td></tr>
+<tr><td><code>原始 SQL 拼接分析器警告</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>编译期能力，与 Provider 无关</td></tr>
+<tr><td><code>内联常量日志脱敏</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>EF Core 日志能力</td></tr>
+</table>
+<h2>5. Queryable 标准运算符兼容矩阵</h2>
+<table><tr><th>能力</th><th>原报告</th><th>本样例实测</th><th>证据</th></tr>
+<tr><td><code>Aggregate</code></td><td>⛔</td><td>⛔</td><td>EF Core 10 无关系型翻译入口</td></tr>
+<tr><td><code>AggregateBy</code></td><td>⛔</td><td>⛔</td><td>EF Core 10 无关系型翻译入口</td></tr>
+<tr><td><code>Append</code></td><td>⛔</td><td>⛔</td><td>EF Core 10 无关系型翻译入口</td></tr>
+<tr><td><code>Chunk</code></td><td>⛔</td><td>⛔</td><td>EF Core 10 无关系型翻译入口</td></tr>
+<tr><td><code>All</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Aggregate_operators</td></tr>
+<tr><td><code>Any</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Aggregate_operators</td></tr>
+<tr><td><code>AsQueryable</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>LINQ 管线操作</td></tr>
+<tr><td><code>Average</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Aggregate_operators</td></tr>
+<tr><td><code>Cast</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseQueryTranslationIntegrationTests.Aggregate_and_element_operators / Set_ordering_and_paging_operators</td></tr>
+<tr><td><code>CountBy</code></td><td>⛔</td><td>⛔</td><td>EF Core 10 无关系型翻译入口</td></tr>
+<tr><td><code>Concat</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Set_ordering_and_paging</td></tr>
+<tr><td><code>Contains</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Set_ordering_and_paging / String_translations</td></tr>
+<tr><td><code>Count</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Aggregate_operators</td></tr>
+<tr><td><code>DistinctBy</code></td><td>⛔</td><td>⛔</td><td>EF Core 10 无关系型翻译入口</td></tr>
+<tr><td><code>DefaultIfEmpty</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseQueryTranslationIntegrationTests.Aggregate_and_element_operators / Set_ordering_and_paging_operators</td></tr>
+<tr><td><code>Distinct</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Set_ordering_and_paging</td></tr>
+<tr><td><code>ExceptBy</code></td><td>⛔</td><td>⛔</td><td>EF Core 10 无关系型翻译入口</td></tr>
+<tr><td><code>ElementAt</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Element_operators</td></tr>
+<tr><td><code>ElementAtOrDefault</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Element_operators</td></tr>
+<tr><td><code>Except</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Set_ordering_and_paging</td></tr>
+<tr><td><code>First</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Element_operators</td></tr>
+<tr><td><code>FirstOrDefault</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Element_operators</td></tr>
+<tr><td><code>GroupBy</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Join_grouping_and_select_many</td></tr>
+<tr><td><code>GroupJoin</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseQueryTranslationIntegrationTests.Remaining_relational_queryable_shapes</td></tr>
+<tr><td><code>Index</code></td><td>⛔</td><td>⛔</td><td>EF Core 10 无关系型翻译入口</td></tr>
+<tr><td><code>Intersect</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Set_ordering_and_paging</td></tr>
+<tr><td><code>IntersectBy</code></td><td>⛔</td><td>⛔</td><td>EF Core 10 无关系型翻译入口</td></tr>
+<tr><td><code>Join</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Join_grouping_and_select_many</td></tr>
+<tr><td><code>Last</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Element_operators</td></tr>
+<tr><td><code>LastOrDefault</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Element_operators</td></tr>
+<tr><td><code>LeftJoin</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseQueryTranslationIntegrationTests.Grouping_and_join_operators</td></tr>
+<tr><td><code>LongCount</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Aggregate_operators</td></tr>
+<tr><td><code>Max</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Aggregate_operators</td></tr>
+<tr><td><code>MaxBy</code></td><td>⛔</td><td>⛔</td><td>EF Core 10 无关系型翻译入口</td></tr>
+<tr><td><code>Min</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Aggregate_operators</td></tr>
+<tr><td><code>MinBy</code></td><td>⛔</td><td>⛔</td><td>EF Core 10 无关系型翻译入口</td></tr>
+<tr><td><code>OfType</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseQueryTranslationIntegrationTests.Aggregate_and_element_operators / Set_ordering_and_paging_operators</td></tr>
+<tr><td><code>Order</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseQueryTranslationIntegrationTests.Aggregate_and_element_operators / Set_ordering_and_paging_operators</td></tr>
+<tr><td><code>OrderBy</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Set_ordering_and_paging</td></tr>
+<tr><td><code>OrderByDescending</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Set_ordering_and_paging</td></tr>
+<tr><td><code>OrderDescending</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseQueryTranslationIntegrationTests.Aggregate_and_element_operators / Set_ordering_and_paging_operators</td></tr>
+<tr><td><code>Prepend</code></td><td>⛔</td><td>⛔</td><td>EF Core 10 无关系型翻译入口</td></tr>
+<tr><td><code>Reverse</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Set_ordering_and_paging</td></tr>
+<tr><td><code>RightJoin</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseQueryTranslationIntegrationTests.Grouping_and_join_operators</td></tr>
+<tr><td><code>Select</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Comparison_logic / String_translations</td></tr>
+<tr><td><code>SelectMany</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Join_grouping_and_select_many</td></tr>
+<tr><td><code>SequenceEqual</code></td><td>⛔</td><td>⛔</td><td>EF Core 10 无关系型翻译入口</td></tr>
+<tr><td><code>Shuffle</code></td><td>⛔</td><td>⛔</td><td>EF Core 10 无关系型翻译入口</td></tr>
+<tr><td><code>Single</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Element_operators</td></tr>
+<tr><td><code>SingleOrDefault</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Element_operators</td></tr>
+<tr><td><code>Skip</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Set_ordering_and_paging</td></tr>
+<tr><td><code>SkipLast</code></td><td>⛔</td><td>⛔</td><td>EF Core 10 无关系型翻译入口</td></tr>
+<tr><td><code>SkipWhile</code></td><td>⛔</td><td>⛔</td><td>EF Core 10 无关系型翻译入口</td></tr>
+<tr><td><code>Sum</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Aggregate_operators</td></tr>
+<tr><td><code>Take</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Set_ordering_and_paging</td></tr>
+<tr><td><code>TakeLast</code></td><td>⛔</td><td>⛔</td><td>EF Core 10 无关系型翻译入口</td></tr>
+<tr><td><code>TakeWhile</code></td><td>⛔</td><td>⛔</td><td>EF Core 10 无关系型翻译入口</td></tr>
+<tr><td><code>ThenBy</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Set_ordering_and_paging</td></tr>
+<tr><td><code>ThenByDescending</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Set_ordering_and_paging</td></tr>
+<tr><td><code>Union</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Set_ordering_and_paging</td></tr>
+<tr><td><code>UnionBy</code></td><td>⛔</td><td>⛔</td><td>EF Core 10 无关系型翻译入口</td></tr>
+<tr><td><code>Where</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Comparison_logic / String_translations</td></tr>
+<tr><td><code>Zip</code></td><td>⛔</td><td>⛔</td><td>EF Core 10 无关系型翻译入口</td></tr>
+</table>
+<h2>6.1 EntityFrameworkQueryableExtensions</h2>
+<table><tr><th>能力</th><th>原报告</th><th>本样例实测</th><th>证据</th></tr>
+<tr><td><code>AllAsync</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Aggregate_operators</td></tr>
+<tr><td><code>AnyAsync</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Aggregate_operators</td></tr>
+<tr><td><code>AsAsyncEnumerable</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseQueryTranslationIntegrationTests.Ef_query_extensions_execute_on_kingbase</td></tr>
+<tr><td><code>AsNoTracking</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Query_extensions</td></tr>
+<tr><td><code>AsNoTrackingWithIdentityResolution</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Query_extensions</td></tr>
+<tr><td><code>AsTracking</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Query_extensions</td></tr>
+<tr><td><code>AverageAsync</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Aggregate_operators</td></tr>
+<tr><td><code>ContainsAsync</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Aggregate_operators</td></tr>
+<tr><td><code>CountAsync</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Aggregate_operators</td></tr>
+<tr><td><code>ElementAtAsync</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Element_operators</td></tr>
+<tr><td><code>ElementAtOrDefaultAsync</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Element_operators</td></tr>
+<tr><td><code>ExecuteDelete</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilitySaveTrackingTests.ExecuteDelete_and_ExecuteUpdate</td></tr>
+<tr><td><code>ExecuteDeleteAsync</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilitySaveTrackingTests.ExecuteDelete_and_ExecuteUpdate</td></tr>
+<tr><td><code>ExecuteUpdate</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilitySaveTrackingTests.ExecuteDelete_and_ExecuteUpdate</td></tr>
+<tr><td><code>ExecuteUpdateAsync</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilitySaveTrackingTests.ExecuteDelete_and_ExecuteUpdate</td></tr>
+<tr><td><code>FirstAsync</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Element_operators</td></tr>
+<tr><td><code>FirstOrDefaultAsync</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Element_operators</td></tr>
+<tr><td><code>ForEachAsync</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Query_extensions</td></tr>
+<tr><td><code>IgnoreAutoIncludes</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseQueryTranslationIntegrationTests.Ef_query_extensions_execute_on_kingbase</td></tr>
+<tr><td><code>IgnoreQueryFilters</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Ignore_query_filters_reveals_soft_deleted</td></tr>
+<tr><td><code>Include</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Query_extensions</td></tr>
+<tr><td><code>LastAsync</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Element_operators</td></tr>
+<tr><td><code>LastOrDefaultAsync</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Element_operators</td></tr>
+<tr><td><code>Load</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Query_extensions</td></tr>
+<tr><td><code>LoadAsync</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Query_extensions</td></tr>
+<tr><td><code>LongCountAsync</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Aggregate_operators</td></tr>
+<tr><td><code>MaxAsync</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Aggregate_operators</td></tr>
+<tr><td><code>MinAsync</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Aggregate_operators</td></tr>
+<tr><td><code>SingleAsync</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Element_operators</td></tr>
+<tr><td><code>SingleOrDefaultAsync</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Element_operators</td></tr>
+<tr><td><code>SumAsync</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Aggregate_operators</td></tr>
+<tr><td><code>TagWith</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Query_extensions</td></tr>
+<tr><td><code>TagWithCallSite</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Query_extensions</td></tr>
+<tr><td><code>ThenInclude</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Query_extensions</td></tr>
+<tr><td><code>ToArrayAsync</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Query_extensions</td></tr>
+<tr><td><code>ToDictionaryAsync</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Query_extensions</td></tr>
+<tr><td><code>ToHashSetAsync</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Query_extensions</td></tr>
+<tr><td><code>ToListAsync</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>全测试通用</td></tr>
+<tr><td><code>ToQueryString</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Query_extensions</td></tr>
+</table>
+<h2>6.2 RelationalQueryableExtensions</h2>
+<table><tr><th>能力</th><th>原报告</th><th>本样例实测</th><th>证据</th></tr>
+<tr><td><code>AsSingleQuery</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Query_extensions</td></tr>
+<tr><td><code>AsSplitQuery</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Query_extensions</td></tr>
+<tr><td><code>CreateDbCommand</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.From_sql_and_create_db_command</td></tr>
+<tr><td><code>FromSql</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.From_sql_and_create_db_command</td></tr>
+<tr><td><code>FromSqlInterpolated</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.From_sql_and_create_db_command</td></tr>
+<tr><td><code>FromSqlRaw</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.From_sql_and_create_db_command</td></tr>
+</table>
+<h2>7. 表达式、运算符和函数翻译</h2>
+<table><tr><th>能力</th><th>原报告</th><th>本样例实测</th><th>证据</th></tr>
+<tr><td><code>== != &gt; &gt;= &lt; &lt;=</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Comparison_logic</td></tr>
+<tr><td><code>&amp;&amp; || !</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Comparison_logic</td></tr>
+<tr><td><code>+ - * / %</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Comparison_logic<br/><span class="note">real % integer 无操作符(42883),取模用 (int) 转型</span></td></tr>
+<tr><td><code>三元条件 ?:</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Comparison_logic</td></tr>
+<tr><td><code>null 合并 ??</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Null_coalesce</td></tr>
+<tr><td><code>null 比较与补偿</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Element_operators</td></tr>
+<tr><td><code>字符串拼接</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Comparison_logic</td></tr>
+<tr><td><code>string.Equals</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Comparison_logic</td></tr>
+<tr><td><code>Contains/StartsWith/EndsWith</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.String_translations</td></tr>
+<tr><td><code>ToLower/ToUpper</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.String_translations</td></tr>
+<tr><td><code>Substring/Replace/Trim/IndexOf</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.String_translations</td></tr>
+<tr><td><code>string.Length</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.String_translations</td></tr>
+<tr><td><code>EF.Functions.Like</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Ef_functions_guid_enum</td></tr>
+<tr><td><code>EF.Functions.Collate</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Ef_functions_guid_enum</td></tr>
+<tr><td><code>EF.Functions.Random</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Ef_functions_guid_enum</td></tr>
+<tr><td><code>Math.*</code></td><td>🟠</td><td>🟡 Provider 套件已验证</td><td>KingbaseQueryTranslationIntegrationTests.Math_translations<br/><span class="note">已实现并验证 abs/ceil/floor/round/sqrt/cbrt/log/log2/max/min/clamp/三角</span></td></tr>
+<tr><td><code>DateTime.* 成员/方法</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Date_translations</td></tr>
+<tr><td><code>DateOnly/TimeOnly 方法</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseQueryTranslationIntegrationTests（对应专项）</td></tr>
+<tr><td><code>Guid.NewGuid()</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Ef_functions_guid_enum</td></tr>
+<tr><td><code>Enum HasFlag/ToString</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Ef_functions_guid_enum</td></tr>
+<tr><td><code>Regex</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseQueryTranslationIntegrationTests（对应专项）</td></tr>
+<tr><td><code>byte array SequenceEqual</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseQueryTranslationIntegrationTests（对应专项）</td></tr>
+<tr><td><code>全文检索</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseQueryTranslationIntegrationTests（对应专项）</td></tr>
+<tr><td><code>数组运算</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseQueryTranslationIntegrationTests（对应专项）</td></tr>
+<tr><td><code>range 运算</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseQueryTranslationIntegrationTests（对应专项）</td></tr>
+<tr><td><code>JSON path/query</code></td><td>🟠</td><td>🟡 Provider 套件已验证</td><td>KingbaseRemainingCoverageIntegrationTests.Json_array_list_range_and_fulltext_types_roundtrip<br/><span class="note">标量 JSON 单层提取已验证</span></td></tr>
+<tr><td><code>窗口函数</code></td><td>❌</td><td>❌</td><td>无 EF 通用公开窗口表达式入口<br/><span class="note">报告结论：不支持</span></td></tr>
+<tr><td><code>LATERAL/APPLY</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseQueryTranslationIntegrationTests（对应专项）</td></tr>
+</table>
+<h2>8. 模型构建语法矩阵</h2>
+<table><tr><th>能力</th><th>原报告</th><th>本样例实测</th><th>证据</th></tr>
+<tr><td><code>DbSet&lt;TEntity&gt; / Entity&lt;TEntity&gt;</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>BookStoreDbContext</td></tr>
+<tr><td><code>表名、schema、列名</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>BookStoreDbContext ToTable/列映射;ModelAndDdlTests</td></tr>
+<tr><td><code>主键、复合主键</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>Book/BookAuthor;ModelBehaviorTests.BookAuthor_composite_key</td></tr>
+<tr><td><code>Alternate Key / Unique Constraint</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseModelIntegrationTests.Model_facets_constraints_relationships_filters_views_and_inheritance / Tpt_tpc_entity_splitting_and_owned_table</td></tr>
+<tr><td><code>Keyless Entity</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseModelIntegrationTests.Model_facets_constraints_relationships_filters_views_and_inheritance / Tpt_tpc_entity_splitting_and_owned_table</td></tr>
+<tr><td><code>Required/Optional 属性</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>Book.Name IsRequired;Author.ShortBio 可空</td></tr>
+<tr><td><code>Shadow Property</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseModelIntegrationTests.Model_facets_constraints_relationships_filters_views_and_inheritance / Tpt_tpc_entity_splitting_and_owned_table</td></tr>
+<tr><td><code>Indexer Property / Property Bag</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseModelIntegrationTests.Model_facets_constraints_relationships_filters_views_and_inheritance / Tpt_tpc_entity_splitting_and_owned_table</td></tr>
+<tr><td><code>Backing Field / Field-only</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseModelIntegrationTests.Model_facets_constraints_relationships_filters_views_and_inheritance / Tpt_tpc_entity_splitting_and_owned_table</td></tr>
+<tr><td><code>Column Type/Name/Order</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>ModelAndDdlTests.Relational_store_types</td></tr>
+<tr><td><code>MaxLength / Unicode</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>BookConsts.MaxNameLength=128 -&gt; varchar(128)</td></tr>
+<tr><td><code>Precision/Scale</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseModelIntegrationTests.Model_facets_constraints_relationships_filters_views_and_inheritance / Tpt_tpc_entity_splitting_and_owned_table</td></tr>
+<tr><td><code>Default Value / Default SQL</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseModelIntegrationTests.Model_facets_constraints_relationships_filters_views_and_inheritance / Tpt_tpc_entity_splitting_and_owned_table</td></tr>
+<tr><td><code>Computed Column</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseModelIntegrationTests.Model_facets_constraints_relationships_filters_views_and_inheritance / Tpt_tpc_entity_splitting_and_owned_table</td></tr>
+<tr><td><code>ValueGeneratedNever</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>Guid 主键客户端赋值</td></tr>
+<tr><td><code>ValueGeneratedOnAdd identity</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseModelIntegrationTests.Model_facets_constraints_relationships_filters_views_and_inheritance / Tpt_tpc_entity_splitting_and_owned_table</td></tr>
+<tr><td><code>Sequence</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseModelIntegrationTests.Model_facets_constraints_relationships_filters_views_and_inheritance / Tpt_tpc_entity_splitting_and_owned_table</td></tr>
+<tr><td><code>HiLo</code></td><td>❌</td><td>❌</td><td>无 Kingbase HiLo/value generator<br/><span class="note">报告结论：不支持</span></td></tr>
+<tr><td><code>GUID 数据库生成</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseModelIntegrationTests.Model_facets_constraints_relationships_filters_views_and_inheritance / Tpt_tpc_entity_splitting_and_owned_table</td></tr>
+<tr><td><code>Concurrency Token</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>ModelBehaviorTests.ConcurrencyStamp_stale_update_throws</td></tr>
+<tr><td><code>RowVersion/Timestamp</code></td><td>❌</td><td>❌</td><td>无统一 rowversion 实现<br/><span class="note">报告结论：不支持</span></td></tr>
+<tr><td><code>Check Constraint</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseModelIntegrationTests.Model_facets_constraints_relationships_filters_views_and_inheritance / Tpt_tpc_entity_splitting_and_owned_table</td></tr>
+<tr><td><code>Index：普通/唯一/复合</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>BookStoreDbContext HasIndex(Name)</td></tr>
+<tr><td><code>Index：descending/filter/include</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseModelIntegrationTests.Model_facets_constraints_relationships_filters_views_and_inheritance / Tpt_tpc_entity_splitting_and_owned_table</td></tr>
+<tr><td><code>一对一</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseModelIntegrationTests.Model_facets_constraints_relationships_filters_views_and_inheritance / Tpt_tpc_entity_splitting_and_owned_table</td></tr>
+<tr><td><code>一对多</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>Book-BookAuthor;Query_extensions Include</td></tr>
+<tr><td><code>多对多/Skip Navigation</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseModelIntegrationTests.Model_facets_constraints_relationships_filters_views_and_inheritance / Tpt_tpc_entity_splitting_and_owned_table</td></tr>
+<tr><td><code>自引用关系</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseModelIntegrationTests.Model_facets_constraints_relationships_filters_views_and_inheritance / Tpt_tpc_entity_splitting_and_owned_table</td></tr>
+<tr><td><code>Cascade/Restrict/SetNull</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>BookAuthor OnDelete(Cascade);ModelBehaviorTests</td></tr>
+<tr><td><code>Owned Entity</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseModelIntegrationTests.Model_facets_constraints_relationships_filters_views_and_inheritance / Tpt_tpc_entity_splitting_and_owned_table</td></tr>
+<tr><td><code>Complex Type table splitting</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseModelIntegrationTests.Model_facets_constraints_relationships_filters_views_and_inheritance / Tpt_tpc_entity_splitting_and_owned_table</td></tr>
+<tr><td><code>Complex Type JSON</code></td><td>❌</td><td>❌</td><td>不支持<br/><span class="note">报告结论：不支持</span></td></tr>
+<tr><td><code>Entity/Table Splitting</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseModelIntegrationTests.Model_facets_constraints_relationships_filters_views_and_inheritance / Tpt_tpc_entity_splitting_and_owned_table</td></tr>
+<tr><td><code>TPH inheritance</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseModelIntegrationTests.Model_facets_constraints_relationships_filters_views_and_inheritance / Tpt_tpc_entity_splitting_and_owned_table</td></tr>
+<tr><td><code>TPT inheritance</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseModelIntegrationTests.Model_facets_constraints_relationships_filters_views_and_inheritance / Tpt_tpc_entity_splitting_and_owned_table</td></tr>
+<tr><td><code>TPC inheritance</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseModelIntegrationTests.Model_facets_constraints_relationships_filters_views_and_inheritance / Tpt_tpc_entity_splitting_and_owned_table</td></tr>
+<tr><td><code>Discriminator</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseModelIntegrationTests.Model_facets_constraints_relationships_filters_views_and_inheritance / Tpt_tpc_entity_splitting_and_owned_table</td></tr>
+<tr><td><code>Global Query Filter</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.Ignore_query_filters_reveals_soft_deleted;Soft_delete_hides_books</td></tr>
+<tr><td><code>Named Query Filters (EF10)</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseModelIntegrationTests.Model_facets_constraints_relationships_filters_views_and_inheritance / Tpt_tpc_entity_splitting_and_owned_table</td></tr>
+<tr><td><code>Value Converter</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseModelIntegrationTests.Model_facets_constraints_relationships_filters_views_and_inheritance / Tpt_tpc_entity_splitting_and_owned_table</td></tr>
+<tr><td><code>Value Comparer</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseModelIntegrationTests.Model_facets_constraints_relationships_filters_views_and_inheritance / Tpt_tpc_entity_splitting_and_owned_table</td></tr>
+<tr><td><code>Data Seeding HasData</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseModelIntegrationTests.Model_facets_constraints_relationships_filters_views_and_inheritance / Tpt_tpc_entity_splitting_and_owned_table</td></tr>
+<tr><td><code>UseSeeding/UseAsyncSeeding</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseModelIntegrationTests.Model_facets_constraints_relationships_filters_views_and_inheritance / Tpt_tpc_entity_splitting_and_owned_table</td></tr>
+<tr><td><code>Database Function mapping</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseModelIntegrationTests.Model_facets_constraints_relationships_filters_views_and_inheritance / Tpt_tpc_entity_splitting_and_owned_table</td></tr>
+<tr><td><code>View mapping</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseModelIntegrationTests.Model_facets_constraints_relationships_filters_views_and_inheritance / Tpt_tpc_entity_splitting_and_owned_table</td></tr>
+<tr><td><code>Stored procedure CUD mapping</code></td><td>❌</td><td>❌</td><td>无存储过程更新 SQL<br/><span class="note">报告结论：不支持</span></td></tr>
+<tr><td><code>Temporal Table</code></td><td>🚫</td><td>🚫</td><td>SQL Server 专有<br/><span class="note">报告结论：不适用</span></td></tr>
+<tr><td><code>Spatial/NetTopologySuite</code></td><td>❌</td><td>❌</td><td>无空间扩展包和类型映射<br/><span class="note">报告结论：不支持</span></td></tr>
+<tr><td><code>JSON document model</code></td><td>🟠</td><td>🟡 Provider 套件已验证</td><td>KingbaseRemainingCoverageIntegrationTests.Json_array_list_range_and_fulltext_types_roundtrip<br/><span class="note">标量 JsonDocument 已验证</span></td></tr>
+<tr><td><code>Primitive Collections</code></td><td>🟠</td><td>🟡 Provider 套件已验证</td><td>同上<br/><span class="note">int[]/List&lt;int&gt; 已验证</span></td></tr>
+</table>
+<h2>9. CLR 与数据库类型支持</h2>
+<table><tr><th>能力</th><th>原报告</th><th>本样例实测</th><th>证据</th></tr>
+<tr><td><code>bool → boolean</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>Soft_delete_hides_books（IsDeleted）</td></tr>
+<tr><td><code>byte → smallint</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseTypeAndSaveIntegrationTests.Scalar_clr_types_roundtrip</td></tr>
+<tr><td><code>short → smallint</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>同上</td></tr>
+<tr><td><code>int → integer</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>同上</td></tr>
+<tr><td><code>long → bigint</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>同上</td></tr>
+<tr><td><code>float → real</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>Book.Price 往返;Aggregate/Comparison</td></tr>
+<tr><td><code>double → double precision</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>同上</td></tr>
+<tr><td><code>decimal → numeric(p,s)</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>同上</td></tr>
+<tr><td><code>string → text/varchar(n)/char(n)</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>Book.Name varchar(128)</td></tr>
+<tr><td><code>Guid → uuid</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>Book.Id/Author.Id 往返</td></tr>
+<tr><td><code>byte[] → bytea</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>同上</td></tr>
+<tr><td><code>DateOnly → date</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>同上</td></tr>
+<tr><td><code>TimeOnly → time without time zone</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>同上</td></tr>
+<tr><td><code>TimeSpan → interval</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>同上</td></tr>
+<tr><td><code>DateTime → timestamp without time zone</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>Book.PublishDate 往返;Date_translations</td></tr>
+<tr><td><code>DateTimeOffset → timestamp with time zone</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>同上</td></tr>
+<tr><td><code>Nullable 上述类型 → 对应类型</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>同上</td></tr>
+<tr><td><code>char → character(1)</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>同上</td></tr>
+<tr><td><code>unsigned integers → smallint/integer/bigint/numeric(20,0)</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>同上</td></tr>
+<tr><td><code>enum → integer</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>Book.Type 往返;Ef_functions_guid_enum</td></tr>
+<tr><td><code>JsonDocument/JsonElement → jsonb</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseRemainingCoverageIntegrationTests.Json_array_list_range_and_fulltext_types_roundtrip</td></tr>
+<tr><td><code>int[] / List&lt;int&gt; → integer[]</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>同上</td></tr>
+<tr><td><code>KdbndpRange&lt;int&gt; → int4range</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>同上</td></tr>
+<tr><td><code>Spatial 类型</code></td><td>❌</td><td>❌</td><td>实例未装空间扩展<br/><span class="note">报告结论：不支持</span></td></tr>
+<tr><td><code>NodaTime 类型</code></td><td>❌</td><td>❌</td><td>需 NodaTime 包及插件<br/><span class="note">报告结论：需独立交付</span></td></tr>
+</table>
+<h2>10. 保存、跟踪和批量操作</h2>
+<table><tr><th>能力</th><th>原报告</th><th>本样例实测</th><th>证据</th></tr>
+<tr><td><code>Add/AddAsync/AddRange</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilitySaveTrackingTests.Add_and_AddRange</td></tr>
+<tr><td><code>Attach/AttachRange</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilitySaveTrackingTests.Attach_and_AttachRange</td></tr>
+<tr><td><code>Update/UpdateRange</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilitySaveTrackingTests.Update_and_UpdateRange</td></tr>
+<tr><td><code>Remove/RemoveRange</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilitySaveTrackingTests.Remove_and_RemoveRange</td></tr>
+<tr><td><code>SaveChanges/SaveChangesAsync</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilitySaveTrackingTests.SaveChanges_sync_and_async</td></tr>
+<tr><td><code>ChangeTracker DetectChanges</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilitySaveTrackingTests.DetectChanges</td></tr>
+<tr><td><code>Snapshot/Notification tracking</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseTypeAndSaveIntegrationTests.Save_tracking_batching_concurrency_and_cascade</td></tr>
+<tr><td><code>Identity Resolution</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseTypeAndSaveIntegrationTests.Save_tracking_batching_concurrency_and_cascade</td></tr>
+<tr><td><code>Relationship fixup</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseTypeAndSaveIntegrationTests.Save_tracking_batching_concurrency_and_cascade</td></tr>
+<tr><td><code>Temporary values</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseTypeAndSaveIntegrationTests.Save_tracking_batching_concurrency_and_cascade</td></tr>
+<tr><td><code>Store-generated identity</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseTypeAndSaveIntegrationTests.Save_tracking_batching_concurrency_and_cascade</td></tr>
+<tr><td><code>Store-generated default/computed</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseTypeAndSaveIntegrationTests.Save_tracking_batching_concurrency_and_cascade</td></tr>
+<tr><td><code>Optimistic concurrency success</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilitySaveTrackingTests.Update_and_UpdateRange</td></tr>
+<tr><td><code>DbUpdateConcurrencyException</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>ModelBehaviorTests.ConcurrencyStamp_stale_update_throws（ABP 包装为 AbpDbConcurrencyException）</td></tr>
+<tr><td><code>Cascade delete client/database</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>ModelBehaviorTests.BookAuthor_composite_key;CapabilitySaveTrackingTests.Remove_and_RemoveRange</td></tr>
+<tr><td><code>Batching</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilitySaveTrackingTests.SaveChanges_sync_and_async</td></tr>
+<tr><td><code>ExecuteDelete</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilitySaveTrackingTests.ExecuteDelete_and_ExecuteUpdate</td></tr>
+<tr><td><code>ExecuteUpdate</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilitySaveTrackingTests.ExecuteDelete_and_ExecuteUpdate</td></tr>
+<tr><td><code>JSON ExecuteUpdate</code></td><td>❌</td><td>❌</td><td>不支持<br/><span class="note">报告结论：不支持</span></td></tr>
+<tr><td><code>Stored procedure SaveChanges</code></td><td>❌</td><td>❌</td><td>不支持<br/><span class="note">报告结论：不支持</span></td></tr>
+</table>
+<h2>11. 连接、事务、原始 SQL 和执行策略</h2>
+<table><tr><th>能力</th><th>原报告</th><th>本样例实测</th><th>证据</th></tr>
+<tr><td><code>OpenConnection/CloseConnection 同步/异步</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityConnectionTransactionsTests.Connection_lifecycle</td></tr>
+<tr><td><code>BeginTransaction/Commit/Rollback</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityConnectionTransactionsTests.Begin_transaction</td></tr>
+<tr><td><code>Savepoint</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityConnectionTransactionsTests.Savepoints</td></tr>
+<tr><td><code>Ambient TransactionScope</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseFacadeAndMigrationsIntegrationTests.Facade_transaction_raw_sql_timeout_compiled_query_and_interceptors_work</td></tr>
+<tr><td><code>UseTransaction</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityConnectionTransactionsTests.Use_transaction_with_external_kdbndp_connection</td></tr>
+<tr><td><code>Execution Strategy/Retry</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityConnectionTransactionsTests.Execution_strategy</td></tr>
+<tr><td><code>Command timeout</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityConnectionTransactionsTests.Connection_lifecycle</td></tr>
+<tr><td><code>Connection pooling</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseRemainingCoverageIntegrationTests.Query_transaction_interceptors_and_connection_pool_concurrency_work</td></tr>
+<tr><td><code>多主机/故障转移</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseRemainingCoverageIntegrationTests.Data_source_and_single_host_multi_host_source_work</td></tr>
+<tr><td><code>FromSql/FromSqlRaw/FromSqlInterpolated</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityLinqAndTranslationsTests.From_sql_and_create_db_command</td></tr>
+<tr><td><code>SqlQuery/SqlQueryRaw</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityConnectionTransactionsTests.Raw_sql</td></tr>
+<tr><td><code>ExecuteSql/ExecuteSqlRaw/Interpolated</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityConnectionTransactionsTests.Raw_sql</td></tr>
+<tr><td><code>Query/Command/Transaction Interceptor</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>TestSaveChangesInterceptor（样例）;KingbaseFacadeAndMigrationsIntegrationTests</td></tr>
+<tr><td><code>Compiled Query</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseFacadeAndMigrationsIntegrationTests.Facade_transaction_raw_sql_timeout_compiled_query_and_interceptors_work</td></tr>
+<tr><td><code>Compiled Model</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseFacadeAndMigrationsIntegrationTests.Facade_transaction_raw_sql_timeout_compiled_query_and_interceptors_work</td></tr>
+<tr><td><code>Query precompilation/NativeAOT</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseFacadeAndMigrationsIntegrationTests.Facade_transaction_raw_sql_timeout_compiled_query_and_interceptors_work</td></tr>
+</table>
+<h2>12. RelationalDatabaseFacadeExtensions 全清单</h2>
+<table><tr><th>能力</th><th>原报告</th><th>本样例实测</th><th>证据</th></tr>
+<tr><td><code>BeginTransaction</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityConnectionTransactionsTests.Begin_transaction</td></tr>
+<tr><td><code>BeginTransactionAsync</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityConnectionTransactionsTests.Begin_transaction</td></tr>
+<tr><td><code>CloseConnection</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityConnectionTransactionsTests.Connection_lifecycle</td></tr>
+<tr><td><code>CloseConnectionAsync</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityConnectionTransactionsTests.Connection_lifecycle</td></tr>
+<tr><td><code>ExecuteSql</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityConnectionTransactionsTests.Raw_sql</td></tr>
+<tr><td><code>ExecuteSqlAsync</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityConnectionTransactionsTests.Raw_sql</td></tr>
+<tr><td><code>ExecuteSqlInterpolated</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityConnectionTransactionsTests.Raw_sql</td></tr>
+<tr><td><code>ExecuteSqlInterpolatedAsync</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityConnectionTransactionsTests.Raw_sql</td></tr>
+<tr><td><code>ExecuteSqlRaw</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityConnectionTransactionsTests.Raw_sql</td></tr>
+<tr><td><code>ExecuteSqlRawAsync</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityConnectionTransactionsTests.Raw_sql</td></tr>
+<tr><td><code>GenerateCreateScript</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityConnectionTransactionsTests.Connection_lifecycle;ModelAndDdlTests</td></tr>
+<tr><td><code>GetAppliedMigrations</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseFacadeAndMigrationsIntegrationTests.Facade_transaction_raw_sql_timeout_compiled_query_and_interceptors_work</td></tr>
+<tr><td><code>GetAppliedMigrationsAsync</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseFacadeAndMigrationsIntegrationTests.Facade_transaction_raw_sql_timeout_compiled_query_and_interceptors_work</td></tr>
+<tr><td><code>GetCommandTimeout</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityConnectionTransactionsTests.Connection_lifecycle</td></tr>
+<tr><td><code>GetConnectionString</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityConnectionTransactionsTests.Connection_lifecycle</td></tr>
+<tr><td><code>GetDbConnection</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityConnectionTransactionsTests.Connection_lifecycle</td></tr>
+<tr><td><code>GetMigrations</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseFacadeAndMigrationsIntegrationTests.Facade_transaction_raw_sql_timeout_compiled_query_and_interceptors_work</td></tr>
+<tr><td><code>GetPendingMigrations</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseFacadeAndMigrationsIntegrationTests.Facade_transaction_raw_sql_timeout_compiled_query_and_interceptors_work</td></tr>
+<tr><td><code>GetPendingMigrationsAsync</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseFacadeAndMigrationsIntegrationTests.Facade_transaction_raw_sql_timeout_compiled_query_and_interceptors_work</td></tr>
+<tr><td><code>HasPendingModelChanges</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseFacadeAndMigrationsIntegrationTests.Facade_transaction_raw_sql_timeout_compiled_query_and_interceptors_work</td></tr>
+<tr><td><code>IsRelational</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityConnectionTransactionsTests.Connection_lifecycle</td></tr>
+<tr><td><code>Migrate</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityMigrationsTests.Initial_create_migration</td></tr>
+<tr><td><code>MigrateAsync</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityMigrationsTests.Initial_create_migration</td></tr>
+<tr><td><code>OpenConnection</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityConnectionTransactionsTests.Connection_lifecycle</td></tr>
+<tr><td><code>OpenConnectionAsync</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityConnectionTransactionsTests.Connection_lifecycle</td></tr>
+<tr><td><code>SetCommandTimeout</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityConnectionTransactionsTests.Connection_lifecycle</td></tr>
+<tr><td><code>SetConnectionString</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseFacadeAndMigrationsIntegrationTests.Facade_transaction_raw_sql_timeout_compiled_query_and_interceptors_work</td></tr>
+<tr><td><code>SetDbConnection</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseFacadeAndMigrationsIntegrationTests.Facade_transaction_raw_sql_timeout_compiled_query_and_interceptors_work</td></tr>
+<tr><td><code>SqlQuery</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityConnectionTransactionsTests.Raw_sql</td></tr>
+<tr><td><code>SqlQueryRaw</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityConnectionTransactionsTests.Raw_sql</td></tr>
+<tr><td><code>UseTransaction</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityConnectionTransactionsTests.Use_transaction_with_external_kdbndp_connection</td></tr>
+<tr><td><code>UseTransactionAsync</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityConnectionTransactionsTests.Use_transaction_with_external_kdbndp_connection</td></tr>
+</table>
+<h2>13. Migration 全部操作类型兼容矩阵</h2>
+<table><tr><th>能力</th><th>原报告</th><th>本样例实测</th><th>证据</th></tr>
+<tr><td><code>CreateTableOperation（InitialCreate 应用）</code></td><td>✅</td><td>✅ 本样例实库重验</td><td>CapabilityMigrationsTests.Initial_create_migration</td></tr>
+<tr><td><code>AddCheckConstraintOperation</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseFacadeAndMigrationsIntegrationTests.Migration_history_upgrade_script_and_rollback_work / Migration_operation_sql_executes</td></tr>
+<tr><td><code>AddColumnOperation</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseFacadeAndMigrationsIntegrationTests.Migration_history_upgrade_script_and_rollback_work / Migration_operation_sql_executes</td></tr>
+<tr><td><code>AddForeignKeyOperation</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseFacadeAndMigrationsIntegrationTests.Migration_history_upgrade_script_and_rollback_work / Migration_operation_sql_executes</td></tr>
+<tr><td><code>AddPrimaryKeyOperation</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseFacadeAndMigrationsIntegrationTests.Migration_history_upgrade_script_and_rollback_work / Migration_operation_sql_executes</td></tr>
+<tr><td><code>AddUniqueConstraintOperation</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseFacadeAndMigrationsIntegrationTests.Migration_history_upgrade_script_and_rollback_work / Migration_operation_sql_executes</td></tr>
+<tr><td><code>AlterColumnOperation</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseFacadeAndMigrationsIntegrationTests.Migration_history_upgrade_script_and_rollback_work / Migration_operation_sql_executes</td></tr>
+<tr><td><code>AlterDatabaseOperation</code></td><td>❌</td><td>❌</td><td>数据库不能在线修改 collation<br/><span class="note">报告结论：不支持</span></td></tr>
+<tr><td><code>AlterSequenceOperation</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseFacadeAndMigrationsIntegrationTests.Migration_history_upgrade_script_and_rollback_work / Migration_operation_sql_executes</td></tr>
+<tr><td><code>AlterTableOperation</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseFacadeAndMigrationsIntegrationTests.Migration_history_upgrade_script_and_rollback_work / Migration_operation_sql_executes</td></tr>
+<tr><td><code>CreateIndexOperation</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseFacadeAndMigrationsIntegrationTests.Migration_history_upgrade_script_and_rollback_work / Migration_operation_sql_executes</td></tr>
+<tr><td><code>CreateSequenceOperation</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseFacadeAndMigrationsIntegrationTests.Migration_history_upgrade_script_and_rollback_work / Migration_operation_sql_executes</td></tr>
+<tr><td><code>CreateTableOperation</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseFacadeAndMigrationsIntegrationTests.Migration_history_upgrade_script_and_rollback_work / Migration_operation_sql_executes</td></tr>
+<tr><td><code>DeleteDataOperation</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseFacadeAndMigrationsIntegrationTests.Migration_history_upgrade_script_and_rollback_work / Migration_operation_sql_executes</td></tr>
+<tr><td><code>DropCheckConstraintOperation</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseFacadeAndMigrationsIntegrationTests.Migration_history_upgrade_script_and_rollback_work / Migration_operation_sql_executes</td></tr>
+<tr><td><code>DropColumnOperation</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseFacadeAndMigrationsIntegrationTests.Migration_history_upgrade_script_and_rollback_work / Migration_operation_sql_executes</td></tr>
+<tr><td><code>DropForeignKeyOperation</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseFacadeAndMigrationsIntegrationTests.Migration_history_upgrade_script_and_rollback_work / Migration_operation_sql_executes</td></tr>
+<tr><td><code>DropIndexOperation</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseFacadeAndMigrationsIntegrationTests.Migration_history_upgrade_script_and_rollback_work / Migration_operation_sql_executes</td></tr>
+<tr><td><code>DropPrimaryKeyOperation</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseFacadeAndMigrationsIntegrationTests.Migration_history_upgrade_script_and_rollback_work / Migration_operation_sql_executes</td></tr>
+<tr><td><code>DropSchemaOperation</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseFacadeAndMigrationsIntegrationTests.Migration_history_upgrade_script_and_rollback_work / Migration_operation_sql_executes</td></tr>
+<tr><td><code>DropSequenceOperation</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseFacadeAndMigrationsIntegrationTests.Migration_history_upgrade_script_and_rollback_work / Migration_operation_sql_executes</td></tr>
+<tr><td><code>DropTableOperation</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseFacadeAndMigrationsIntegrationTests.Migration_history_upgrade_script_and_rollback_work / Migration_operation_sql_executes</td></tr>
+<tr><td><code>DropUniqueConstraintOperation</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseFacadeAndMigrationsIntegrationTests.Migration_history_upgrade_script_and_rollback_work / Migration_operation_sql_executes</td></tr>
+<tr><td><code>EnsureSchemaOperation</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseFacadeAndMigrationsIntegrationTests.Migration_history_upgrade_script_and_rollback_work / Migration_operation_sql_executes</td></tr>
+<tr><td><code>InsertDataOperation</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseFacadeAndMigrationsIntegrationTests.Migration_history_upgrade_script_and_rollback_work / Migration_operation_sql_executes</td></tr>
+<tr><td><code>RenameColumnOperation</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseFacadeAndMigrationsIntegrationTests.Migration_history_upgrade_script_and_rollback_work / Migration_operation_sql_executes</td></tr>
+<tr><td><code>RenameIndexOperation</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseFacadeAndMigrationsIntegrationTests.Migration_history_upgrade_script_and_rollback_work / Migration_operation_sql_executes</td></tr>
+<tr><td><code>RenameSequenceOperation</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseFacadeAndMigrationsIntegrationTests.Migration_history_upgrade_script_and_rollback_work / Migration_operation_sql_executes</td></tr>
+<tr><td><code>RenameTableOperation</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseFacadeAndMigrationsIntegrationTests.Migration_history_upgrade_script_and_rollback_work / Migration_operation_sql_executes</td></tr>
+<tr><td><code>RestartSequenceOperation</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseFacadeAndMigrationsIntegrationTests.Migration_history_upgrade_script_and_rollback_work / Migration_operation_sql_executes</td></tr>
+<tr><td><code>SqlOperation</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseFacadeAndMigrationsIntegrationTests.Migration_history_upgrade_script_and_rollback_work / Migration_operation_sql_executes</td></tr>
+<tr><td><code>UpdateDataOperation</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseFacadeAndMigrationsIntegrationTests.Migration_history_upgrade_script_and_rollback_work / Migration_operation_sql_executes</td></tr>
+</table>
+<h2>14. Database First、设计时和工具链</h2>
+<table><tr><th>能力</th><th>原报告</th><th>本样例实测</th><th>证据</th></tr>
+<tr><td><code>dotnet ef 识别 Provider</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseScaffoldingIntegrationTests / KingbaseDesignTimeServicesTests / dotnet ef</td></tr>
+<tr><td><code>dotnet ef migrations add</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>样例已内置 InitialCreate 迁移</td></tr>
+<tr><td><code>dotnet ef database update</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseFacadeAndMigrationsIntegrationTests</td></tr>
+<tr><td><code>dotnet ef migrations script</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseScaffoldingIntegrationTests / KingbaseDesignTimeServicesTests / dotnet ef</td></tr>
+<tr><td><code>dotnet ef dbcontext scaffold</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseScaffoldingIntegrationTests / KingbaseDesignTimeServicesTests / dotnet ef</td></tr>
+<tr><td><code>Provider 配置代码生成</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseScaffoldingIntegrationTests / KingbaseDesignTimeServicesTests / dotnet ef</td></tr>
+<tr><td><code>Annotation C# 代码生成</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseScaffoldingIntegrationTests / KingbaseDesignTimeServicesTests / dotnet ef</td></tr>
+<tr><td><code>Reverse engineer table/view/key/index</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseScaffoldingIntegrationTests / KingbaseDesignTimeServicesTests / dotnet ef</td></tr>
+<tr><td><code>Reverse engineer sequence</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseScaffoldingIntegrationTests / KingbaseDesignTimeServicesTests / dotnet ef</td></tr>
+<tr><td><code>Compiled model optimize</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseScaffoldingIntegrationTests / KingbaseDesignTimeServicesTests / dotnet ef</td></tr>
+<tr><td><code>NativeAOT optimize/precompiled queries</code></td><td>✅</td><td>🟡 Provider 套件已验证</td><td>KingbaseScaffoldingIntegrationTests / KingbaseDesignTimeServicesTests / dotnet ef</td></tr>
+</table>
+<h2>状态图例</h2>
+<ul>
+<li><b>✅ 本样例实库重验</b> — 在真实 KingbaseES 上经 ABP 栈(仓储/UoW/DbContext)执行并通过。</li>
+<li><b>🟡 Provider 套件已验证</b> — 由 <code>test/Kingbase.EntityFrameworkCore.Tests</code> 自带集成测试覆盖,本样例未重复。</li>
+<li><b>⛔/❌/🚫/🟠</b> — 沿用原报告结论(EF 无服务端语义 / 不支持 / 不适用 / 部分支持)。</li>
+</ul>
+</body></html>

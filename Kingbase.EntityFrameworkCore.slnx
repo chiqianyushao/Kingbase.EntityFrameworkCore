@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Kingbase.EntityFrameworkCore/Kingbase.EntityFrameworkCore.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/Kingbase.EntityFrameworkCore.Tests/Kingbase.EntityFrameworkCore.Tests.csproj" />
+  </Folder>
+</Solution>

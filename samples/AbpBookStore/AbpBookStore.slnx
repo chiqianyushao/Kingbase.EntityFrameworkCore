@@ -1,0 +1,18 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/AbpBookStore.Domain.Shared/AbpBookStore.Domain.Shared.csproj" />
+    <Project Path="src/AbpBookStore.Domain/AbpBookStore.Domain.csproj" />
+    <Project Path="src/AbpBookStore.Application.Contracts/AbpBookStore.Application.Contracts.csproj" />
+    <Project Path="src/AbpBookStore.Application/AbpBookStore.Application.csproj" />
+    <Project Path="src/AbpBookStore.EntityFrameworkCore/AbpBookStore.EntityFrameworkCore.csproj" />
+    <Project Path="src/AbpBookStore.HttpApi/AbpBookStore.HttpApi.csproj" />
+    <Project Path="src/AbpBookStore.HttpApi.Host/AbpBookStore.HttpApi.Host.csproj" />
+    <Project Path="src/AbpBookStore.DbMigrator/AbpBookStore.DbMigrator.csproj" />
+    <Project Path="src/AbpBookStore.Client/AbpBookStore.Client.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/AbpBookStore.TestBase/AbpBookStore.TestBase.csproj" />
+    <Project Path="test/AbpBookStore.Application.Tests/AbpBookStore.Application.Tests.csproj" />
+    <Project Path="test/AbpBookStore.EntityFrameworkCore.Tests/AbpBookStore.EntityFrameworkCore.Tests.csproj" />
+  </Folder>
+</Solution>

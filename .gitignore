@@ -1,0 +1,27 @@
+# ===== .NET build output =====
+bin/
+obj/
+artifacts/
+
+# ===== IDE / OS =====
+.vs/
+.idea/
+.vscode/
+*.user
+*.suo
+Thumbs.db
+
+# ===== Local exploration & probes (not part of the repo) =====
+# tmp/   —— 本地探针脚本 / 反编译临时文件
+# tools/ —— 624M 本地数据库探测工程(含驱动二进制);根 slnx 已移除其引用
+# V9R1C10/ —— 85M 金仓官方 PDF 文档(版权参考材料,本地查阅用)
+tmp/
+tools/
+V9R1C10/
+
+# ===== Claude Code local data =====
+.claude/
+
+# ===== Local-only settings / secrets =====
+*.local.json
+appsettings.Development.json
