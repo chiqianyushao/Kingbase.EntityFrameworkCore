@@ -11,6 +11,10 @@
     <Description>Entity Framework Core 10 provider foundation for KingbaseES.</Description>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <NoWarn>$(NoWarn);EF1001;EF9100</NoWarn>
+    <Company>nixiao</Company>
+    <Authors>nixiao</Authors>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
   <ItemGroup>

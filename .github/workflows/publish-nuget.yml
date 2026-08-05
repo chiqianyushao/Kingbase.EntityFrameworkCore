@@ -1,0 +1,42 @@
+# 工作流的名称
+name: Publish NuGet Package
+
+# 触发条件：当代码被推送到 main 分支时，或者手动点击“运行”时
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-and-publish:
+    # 运行环境：使用最新的 Ubuntu 系统
+    runs-on: ubuntu-latest
+    
+    steps:
+    # 1. 拉取你的代码
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    # 2. 安装 .NET SDK（指定你项目需要的版本，比如 8.0）
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    # 3. 还原依赖包
+    - name: Restore dependencies
+      run: dotnet restore
+
+    # 4. 编译项目（Release模式）
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+
+    # 5. 打包生成 .nupkg 文件
+    #    注意：这里的版本号会从你的 .csproj 文件中的 <Version> 标签读取
+    - name: Pack
+      run: dotnet pack --configuration Release --no-build --output ./nupkg
+
+    # 6. 上传到 NuGet.org
+    #    NUGET_API_KEY 需要你在 GitHub 仓库设置里配置好
+    - name: Push to NuGet
+      run: dotnet nuget push ./nupkg/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate

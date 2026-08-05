@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Kingbase.EntityFrameworkCore" Version="10.0.0-alpha.3" />
     <PackageReference Include="Volo.Abp.EntityFrameworkCore" Version="10.6.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.9">
       <PrivateAssets>all</PrivateAssets>
@@ -13,7 +14,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\src\Kingbase.EntityFrameworkCore\Kingbase.EntityFrameworkCore.csproj" />
     <ProjectReference Include="..\AbpBookStore.Domain\AbpBookStore.Domain.csproj" />
   </ItemGroup>
 
